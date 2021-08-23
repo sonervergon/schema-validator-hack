@@ -1,4 +1,5 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
+import Ajv from 'ajv';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import inc from 'semver/functions/inc';
@@ -8,7 +9,9 @@ import { HttpStatus } from '@nestjs/common';
 @Injectable()
 export class SchemaService {
   constructor(
-    @InjectModel(Schema.name) private schemaModel: Model<SchemaDocument>,
+    @Inject('JSON_SCHEMA_VALIDATOR') private validator: Ajv,
+    @InjectModel(Schema.name)
+    private schemaModel: Model<SchemaDocument>,
   ) {}
 
   createSchema = async (
@@ -21,6 +24,11 @@ export class SchemaService {
       schema: jsonSchema,
       version,
     });
+    try {
+      this.validator.compile({ ...jsonSchema, $id: schema.id });
+    } catch (error) {
+      throw new HttpException('Bad schema', HttpStatus.BAD_REQUEST);
+    }
     return schema.save();
   };
 

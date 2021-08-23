@@ -4,7 +4,6 @@ import { AppService } from './app.service';
 import { ValidatorModule } from './validator/validator.module';
 import { SchemaModule } from './schema/schema.module';
 import { MongooseModule } from '@nestjs/mongoose';
-
 @Module({
   imports: [
     ValidatorModule,

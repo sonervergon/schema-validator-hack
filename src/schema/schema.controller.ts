@@ -18,12 +18,12 @@ export class SchemaController {
 
   @Post('/')
   async create(@Body() body: CreateSchemaDto) {
-    try {
-      const doc = await this.schemaService.createSchema(body.id, body.schema);
-      return this.schemaResponse(doc);
-    } catch (error) {
-      return error;
-    }
+    const exists = await this.schemaService.getSchema(body.id);
+    if (exists)
+      throw new HttpException('Schema already exists', HttpStatus.BAD_REQUEST);
+
+    const doc = await this.schemaService.createSchema(body.id, body.schema);
+    return this.schemaResponse(doc);
   }
 
   @Get(':id')
